@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TemkaEnglish</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #2a2a2a 0%, #4d4d3d 25%, #3a3a4e 50%, #4d3d2a 75%, #3a3a3a 100%);
+            background-attachment: fixed;
+            color: #ffffff;
+            overflow-x: hidden;
+            position: relative;
+            font-weight: 400;
+        }
+        body.dark-theme { background: linear-gradient(135deg, #2a2a2a 0%, #3a3a3a 50%, #2a2a2a 100%); }
+        body.red-theme { background: linear-gradient(135deg, #4d2525 0%, #6d3535 50%, #4d2525 100%); }
+        body::before {
+            content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at 20% 50%, rgba(255, 200, 0, 0.05) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 80%, rgba(255, 150, 0, 0.05) 0%, transparent 50%);
+            pointer-events: none; z-index: 1;
+        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes float { 
+            0%, 100% { transform: translateY(0px) rotate(var(--rotation)); } 
+            50% { transform: translateY(-15px) rotate(var(--rotation)); } 
+        }
+        @keyframes pulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 0.7; } }
+        @keyframes floatSlow { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-20px); } }
+        @keyframes scroll { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
+        @keyframes orbitSmall { 0% { transform: rotate(0deg) translateX(60px) rotate(0deg); } 100% { transform: rotate(360deg) translateX(60px) rotate(-360deg); } }
+        @keyframes scrollRight { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+        
+        .meme-float { 
+            position: fixed; 
+            z-index: 0; 
+            pointer-events: none; 
+            opacity: 0.07; 
+            filter: brightness(1.15); 
+            height: auto; 
+            border-radius: 12px; 
+            animation: float 12s ease-in-out infinite; 
+        }
+
+        .floating-banner { position: fixed; top: 0; left: 0; right: 0; height: 35px; background: linear-gradient(90deg, rgba(255, 200, 0, 0.25), rgba(255, 150, 0, 0.25)); border-bottom: 1px solid rgba(255, 200, 0, 0.4); display: flex; align-items: center; overflow: hidden; z-index: 999; backdrop-filter: blur(10px); }
+        .banner-content { display: flex; white-space: nowrap; animation: scroll 8s linear infinite; }
+        .banner-text { padding: 0 30px; font-size: 13px; font-weight: 700; background: linear-gradient(90deg, #FFD700, #FFA500); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; cursor: pointer; transition: all 0.3s ease; text-transform: uppercase; letter-spacing: 1px; }
+        .banner-text:hover { filter: brightness(1.2); }
+        .side-decoration { position: fixed; width: 200px; height: 300px; border-radius: 50%; pointer-events: none; z-index: 0; }
+        .side-left { left: -100px; top: 50%; background: radial-gradient(circle, rgba(255, 200, 0, 0.08) 0%, transparent 70%); animation: floatSlow 6s ease-in-out infinite; }
+        .side-right { right: -100px; bottom: 10%; background: radial-gradient(circle, rgba(255, 150, 0, 0.08) 0%, transparent 70%); animation: floatSlow 8s ease-in-out infinite reverse; }
+        .theme-switcher { position: fixed; top: 50px; left: 20px; display: flex; gap: 10px; z-index: 998; }
+        .theme-btn { width: 45px; height: 45px; border-radius: 10px; border: 2px solid rgba(255, 200, 0, 0.3); background: rgba(255, 200, 0, 0.1); color: white; font-weight: 700; font-size: 18px; cursor: pointer; transition: all 0.3s ease; backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; }
+        .theme-btn:hover { transform: scale(1.1); border-color: rgba(255, 200, 0, 0.6); }
+        .theme-btn.active { background: linear-gradient(135deg, #FFD700, #FFA500); border-color: #FFD700; box-shadow: 0 0 20px rgba(255, 200, 0, 0.5); }
+        .container { max-width: 1400px; margin: 0 auto; padding: 0 50px; }
+        header {
+            background: rgba(15, 15, 15, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 200, 0, 0.15);
+            position: sticky;
+            top: 35px;
+            z-index: 1000;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        .header-content { display: flex; justify-content: space-between; align-items: center; padding: 20px 0; }
+        .logo {
+            font-size: 24px; font-weight: 900;
+            background: linear-gradient(135deg, #FF6B9D 0%, #C06C84 50%, #6C567B 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+            letter-spacing: -1px; text-transform: uppercase;
+            animation: slideUp 0.6s ease-out;
+            text-decoration: none;
+        }
+        .header-right { display: flex; align-items: center; gap: 30px; }
+        nav { display: flex; gap: 30px; }
+        nav a {
+            text-decoration: none; color: rgba(200, 200, 200, 0.8); font-size: 12px;
+            font-weight: 600; position: relative; transition: color 0.3s ease;
+            text-transform: uppercase; letter-spacing: 1px;
+        }
+        nav a::before { content: ''; position: absolute; bottom: -5px; left: 0; width: 0; height: 2px; background: linear-gradient(90deg, #FFD700, #FFA500); transition: width 0.3s ease; }
+        nav a:hover { color: #FFD700; }
+        nav a:hover::before { width: 100%; }
+        .btn-header-support { display: inline-block; background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%); color: #1a1a1a; padding: 8px 20px; border-radius: 10px; text-decoration: none; font-weight: 700; font-size: 12px; border: none; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 0 20px rgba(255, 200, 0, 0.4); text-transform: uppercase; letter-spacing: 0.5px; }
+        .btn-header-support:hover { transform: translateY(-2px); box-shadow: 0 0 40px rgba(255, 200, 0, 0.7); }
+        main { max-width: 1400px; margin: 0 auto; padding: 0 50px; position: relative; z-index: 2; }
+        .hero { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; padding: 140px 0 60px; animation: slideUp 0.9s ease-out; }
+        .hero-left { z-index: 3; }
+        .hero-right-mobile { display: none; }
+        .hero-combined { background: rgba(255, 200, 0, 0.08); padding: 30px 30px; border-radius: 24px; border: 1px solid rgba(255, 200, 0, 0.15); backdrop-filter: blur(10px); animation: slideUp 0.9s ease-out 0.2s backwards; }
+        .hero-combined p { color: #ffffff; font-size: 16px; line-height: 1.8; margin-bottom: 15px; }
+        .hero-combined p:last-child { margin-bottom: 0; }
+        .hero-tag { display: inline-flex; align-items: center; gap: 12px; background: rgba(255, 200, 0, 0.1); border: 1px solid rgba(255, 200, 0, 0.3); padding: 12px 20px; border-radius: 16px; font-size: 13px; font-weight: 700; color: #FFD700; margin-bottom: 30px; backdrop-filter: blur(10px); animation: slideUp 0.9s ease-out 0.1s backwards; }
+        .hero-tags { display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 30px; animation: slideUp 0.9s ease-out 0.1s backwards; }
+        .hero-tags .hero-tag { margin-bottom: 0; }
+        .hero-tag::before { content: ''; width: 6px; height: 6px; background: #FFD700; border-radius: 50%; animation: pulse 2s ease-in-out infinite; }
+        .tiktok-icon { width: 24px; height: 24px; cursor: pointer; transition: all 0.3s ease; filter: brightness(1.2); }
+        .tiktok-icon:hover { transform: scale(1.2) rotate(5deg); filter: brightness(1.5); }
+        .hero h1 { font-size: 72px; font-weight: 900; line-height: 1.1; margin-bottom: 25px; background: linear-gradient(135deg, #FF6B9D 0%, #C06C84 50%, #6C567B 100%); background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; animation: slideUp 0.9s ease-out 0.15s backwards; letter-spacing: -2px; }
+        .hero-right { position: relative; height: 500px; animation: slideUp 0.9s ease-out 0.4s backwards; }
+        .orbiting-circles { position: absolute; width: 100%; height: 100%; }
+        .orbit-1 { position: absolute; width: 200px; height: 200px; border: 1px solid rgba(255, 200, 0, 0.2); border-radius: 50%; top: 50%; left: 50%; transform: translate(-50%, -50%); animation: orbitSmall 20s linear infinite; }
+        .orbit-dot { position: absolute; width: 8px; height: 8px; background: radial-gradient(circle, #FFD700, #FFA500); border-radius: 50%; top: 0; left: 0; box-shadow: 0 0 20px rgba(255, 200, 0, 0.6); }
+        .hero-image-container { position: absolute; width: 450px; height: 450px; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+        .hero-image-glow { position: absolute; width: 100%; height: 100%; background: radial-gradient(circle, rgba(255, 200, 0, 0.2) 0%, transparent 70%); border-radius: 50%; animation: pulse 4s ease-in-out infinite; }
+        .hero-image { position: absolute; width: 100%; height: 100%; object-fit: cover; border-radius: 20px; border: 2px solid rgba(255, 200, 0, 0.4); box-shadow: 0 0 80px rgba(255, 200, 0, 0.5), inset 0 0 60px rgba(255, 200, 0, 0.15), 0 20px 60px rgba(255, 200, 0, 0.3); transition: all 0.3s ease; animation: float 4s ease-in-out infinite; }
+        .hero-image:hover { box-shadow: 0 0 120px rgba(255, 200, 0, 0.8), inset 0 0 80px rgba(255, 200, 0, 0.2), 0 30px 80px rgba(255, 200, 0, 0.5); transform: translateY(-15px) scale(1.02); }
+        .hero-right-mobile .hero-image-container { position: relative; width: 100%; max-width: 320px; height: 320px; top: auto; left: auto; transform: none; }
+        .hero-right-mobile .hero-image { position: relative; }
+        .text-scroll-section { padding: 20px 0; position: relative; z-index: 2; }
+        .scroll-container { overflow: hidden; width: 100%; background: rgba(50, 50, 50, 0.3); backdrop-filter: blur(20px); padding: 15px 0; border-radius: 20px; border: 1px solid rgba(255, 200, 0, 0.15); }
+        .scroll-wrapper { display: flex; gap: 20px; animation: scrollRight 15s linear infinite; white-space: nowrap; }
+        .scroll-word { background: linear-gradient(135deg, rgba(255, 200, 0, 0.2), rgba(255, 150, 0, 0.1)); border: 2px solid rgba(255, 200, 0, 0.4); padding: 15px 30px; border-radius: 12px; font-size: 18px; font-weight: 700; color: #FFD700; backdrop-filter: blur(10px); transition: all 0.3s ease; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; }
+        .scroll-word:hover { background: linear-gradient(135deg, rgba(255, 200, 0, 0.4), rgba(255, 150, 0, 0.3)); transform: translateY(-5px); box-shadow: 0 10px 30px rgba(255, 200, 0, 0.3); }
+        section { padding: 120px 0; position: relative; z-index: 2; animation: slideUp 0.9s ease-out; }
+        .section-title { font-size: 52px; font-weight: 900; text-align: center; margin-bottom: 80px; color: #ffffff; text-transform: uppercase; letter-spacing: -1px; }
+        .about-section { display: grid; grid-template-columns: 1fr 1fr; gap: 100px; align-items: center; background: rgba(50, 50, 50, 0.4); backdrop-filter: blur(20px); padding: 80px 60px; border-radius: 20px; border: 1px solid rgba(255, 200, 0, 0.1); position: relative; overflow: hidden; }
+        .about-section::before { content: ''; position: absolute; top: -50%; right: -50%; width: 500px; height: 500px; background: radial-gradient(circle, rgba(255, 200, 0, 0.1) 0%, transparent 70%); border-radius: 50%; pointer-events: none; }
+        .about-image { width: 100%; max-width: 500px; border-radius: 20px; border: 2px solid rgba(255, 200, 0, 0.3); box-shadow: 0 20px 80px rgba(255, 200, 0, 0.35); object-fit: cover; aspect-ratio: 1; transition: all 0.3s ease; position: relative; z-index: 1; }
+        .about-image:hover { transform: translateY(-8px); box-shadow: 0 30px 100px rgba(255, 200, 0, 0.5); }
+        .about-content { position: relative; z-index: 1; }
+        .about-content h2 { font-size: 42px; font-weight: 900; margin-bottom: 25px; color: #ffffff; text-transform: uppercase; letter-spacing: -1px; }
+        .about-content p { font-size: 16px; line-height: 1.8; color: #ffffff; margin-bottom: 30px; font-weight: 400; }
+        .features { list-style: none; }
+        .features li { padding: 18px 0; font-size: 16px; color: rgba(255, 255, 255, 0.9); display: flex; align-items: center; font-weight: 600; transition: all 0.3s ease; border-bottom: 1px solid rgba(255, 200, 0, 0.1); }
+        .features li:hover { transform: translateX(10px); color: #FFD700; }
+        .features li::before { content: '✓'; color: #FFD700; font-weight: 900; margin-right: 15px; font-size: 20px; background: rgba(255, 200, 0, 0.1); width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 50%; margin-right: 15px; }
+        .btn-support { display: inline-block; background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%); color: #1a1a1a; padding: 12px 30px; border-radius: 10px; text-decoration: none; font-weight: 700; font-size: 13px; margin-top: 25px; border: none; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 0 20px rgba(255, 200, 0, 0.4); text-transform: uppercase; letter-spacing: 0.5px; }
+        .btn-support:hover { transform: translateY(-2px); box-shadow: 0 0 40px rgba(255, 200, 0, 0.7); }
+        .gallery-slider { position: relative; overflow: hidden; padding: 0 60px; }
+        .gallery-track { display: flex; gap: 30px; transition: transform 0.5s ease; }
+        .gallery-item {
+            flex: 0 0 320px;
+            aspect-ratio: 9/16;
+            border-radius: 20px;
+            overflow: hidden;
+            cursor: pointer;
+            border: 1px solid rgba(255, 200, 0, 0.2);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+        }
+        .gallery-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; }
+        .gallery-item:hover img { transform: scale(1.1); }
+        .video-slider {
+            position: relative;
+            overflow: hidden;
+            padding: 40px 0;
+            margin-top: 60px;
+        }
+        .video-slider-container {
+            overflow-x: auto;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            padding: 0 60px;
+        }
+        .video-slider-container::-webkit-scrollbar { display: none; }
+        .video-track {
+            display: flex;
+            gap: 60px;
+            padding: 20px 0;
+            scroll-snap-type: x mandatory;
+        }
+        .video-item {
+            flex: 0 0 340px;
+            width: 340px;
+            height: 340px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 4px solid rgba(255, 200, 0, 0.4);
+            background: rgba(30, 30, 30, 0.7);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 40px rgba(255, 200, 0, 0.15);
+            transition: all 0.4s ease;
+            scroll-snap-align: center;
+        }
+        .video-item:hover {
+            transform: scale(1.08);
+            border-color: #FFD700;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6), 0 0 60px rgba(255, 200, 0, 0.35);
+        }
+        .video-item video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+        .slider-btn {
+            position: absolute; top: 50%; transform: translateY(-50%);
+            width: 50px; height: 50px; background: linear-gradient(135deg, #FFD700, #FFA500);
+            border: none; border-radius: 50%; cursor: pointer; font-size: 24px; color: #1a1a1a;
+            z-index: 10; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 0 30px rgba(255,200,0,0.6);
+        }
+        .slider-btn:hover { transform: translateY(-50%) scale(1.15); }
+        .slider-btn.prev { left: 10px; }
+        .slider-btn.next { right: 10px; }
+        .lessons-section { background: linear-gradient(135deg, rgba(40, 40, 40, 0.3) 0%, rgba(35, 35, 35, 0.3) 100%); backdrop-filter: blur(20px); padding: 80px 60px; border-radius: 20px; border: 1px solid rgba(255, 200, 0, 0.15); position: relative; overflow: hidden; margin-bottom: 80px; }
+        .lessons-section::before { content: ''; position: absolute; top: -30%; left: -30%; width: 400px; height: 400px; background: radial-gradient(circle, rgba(255, 200, 0, 0.1) 0%, transparent 70%); border-radius: 50%; pointer-events: none; }
+        .lessons-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; position: relative; z-index: 1; }
+        .lesson-card { background: rgba(45, 45, 45, 0.4); backdrop-filter: blur(10px); padding: 45px; border-radius: 16px; border: 1px solid rgba(255, 200, 0, 0.2); transition: all 0.3s ease; position: relative; overflow: hidden; }
+        .lesson-card::before { content: ''; position: absolute; top: -50%; right: -50%; width: 300px; height: 300px; background: radial-gradient(circle, rgba(255, 200, 0, 0.1) 0%, transparent 70%); border-radius: 50%; pointer-events: none; }
+        .lesson-card:hover { border-color: rgba(255, 200, 0, 0.5); background: rgba(50, 50, 50, 0.5); transform: translateY(-8px); box-shadow: 0 20px 60px rgba(255, 200, 0, 0.15); }
+        .lesson-card h3 { font-size: 22px; font-weight: 900; margin-bottom: 25px; color: #ffffff; text-transform: uppercase; letter-spacing: -0.5px; }
+        .lesson-list { list-style: none; font-size: 15px; color: #ffffff; line-height: 1.9; position: relative; z-index: 2; }
+        .lesson-list li { margin-bottom: 14px; font-weight: 500; transition: color 0.3s ease; }
+        .lesson-list li:hover { color: #FFD700; }
+        .lesson-list li::before { content: '→'; color: #FFA500; margin-right: 10px; font-weight: 900; }
+        .price-section { margin-top: 40px; padding-top: 35px; border-top: 1px solid rgba(255, 200, 0, 0.2); position: relative; z-index: 2; }
+        .price-text { font-size: 36px; font-weight: 900; margin-bottom: 15px; background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-transform: uppercase; }
+        .price-desc { font-size: 15px; color: #ffffff; line-height: 1.7; font-weight: 400; }
+        .methods { display: flex; gap: 12px; margin-top: 25px; flex-wrap: wrap; }
+        .method { background: rgba(255, 200, 0, 0.1); border: 1px solid rgba(255, 200, 0, 0.3); padding: 12px 20px; border-radius: 8px; font-size: 13px; color: #FFD700; font-weight: 700; backdrop-filter: blur(10px); transition: all 0.3s ease; text-transform: uppercase; letter-spacing: 0.5px; }
+        .method:hover { background: rgba(255, 200, 0, 0.2); border-color: rgba(255, 200, 0, 0.6); transform: translateY(-2px); }
+        .btn-record { display: inline-block; background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%); color: #1a1a1a; padding: 16px 42px; border-radius: 12px; text-decoration: none; font-weight: 900; font-size: 14px; margin-top: 30px; border: none; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 0 30px rgba(255, 200, 0, 0.4); position: relative; overflow: hidden; text-transform: uppercase; letter-spacing: 1px; }
+        .btn-record::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.2); transition: left 0.3s ease; }
+        .btn-record:hover { transform: translateY(-4px); box-shadow: 0 0 60px rgba(255, 200, 0, 0.7); }
+        .btn-record:hover::before { left: 100%; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.95); z-index: 2000; align-items: center; justify-content: center; }
+        .modal.active { display: flex; }
+        .modal-content { position: relative; max-width: 90vw; max-height: 90vh; }
+        .modal-img { width: 100%; height: 100%; object-fit: contain; border-radius: 16px; }
+        .modal-close { position: absolute; top: -40px; right: 0; width: 40px; height: 40px; background: linear-gradient(135deg, #FFD700, #FFA500); border: none; border-radius: 50%; cursor: pointer; font-size: 24px; color: #1a1a1a; font-weight: 900; }
+        .modal-close:hover { transform: scale(1.1); }
+        .faq-section { background: linear-gradient(135deg, rgba(40, 40, 40, 0.3) 0%, rgba(35, 35, 35, 0.3) 100%); backdrop-filter: blur(20px); padding: 80px 60px; border-radius: 20px; border: 1px solid rgba(255, 200, 0, 0.15); position: relative; overflow: hidden; margin-bottom: 60px; }
+        .faq-section::before { content: ''; position: absolute; top: -30%; left: -30%; width: 400px; height: 400px; background: radial-gradient(circle, rgba(255, 200, 0, 0.1) 0%, transparent 70%); border-radius: 50%; pointer-events: none; }
+        .faq-item { background: rgba(45, 45, 45, 0.4); backdrop-filter: blur(10px); padding: 25px 30px; border-radius: 12px; border: 1px solid rgba(255, 200, 0, 0.2); margin-bottom: 15px; cursor: pointer; transition: all 0.3s ease; position: relative; z-index: 1; }
+        .faq-item:hover { border-color: rgba(255, 200, 0, 0.5); background: rgba(50, 50, 50, 0.5); }
+        .faq-header { display: flex; justify-content: space-between; align-items: center; font-weight: 700; color: #FFD700; font-size: 16px; user-select: none; }
+        .faq-toggle { font-size: 20px; transition: transform 0.3s ease; }
+        .faq-answer { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; color: rgba(255, 255, 255, 0.9); font-size: 15px; line-height: 1.6; margin-top: 0; font-weight: 400; }
+        .faq-item.active .faq-answer { max-height: 500px; margin-top: 15px; }
+        .faq-item.active .faq-toggle { transform: rotate(180deg); }
+        footer { background: rgba(10, 10, 10, 0.9); border-top: 1px solid rgba(255, 200, 0, 0.1); padding: 60px 50px; text-align: center; color: rgba(200, 200, 200, 0.8); font-size: 14px; font-weight: 500; backdrop-filter: blur(20px); }
+        @media (max-width: 768px) {
+            .container, main { padding: 0 20px; }
+            .header-content { flex-direction: column; align-items: center; padding: 15px 0; }
+            .logo { margin-bottom: 10px; font-size: 22px; }
+            .header-right { flex-direction: column; gap: 15px; width: 100%; }
+            nav { width: 100%; justify-content: space-around; gap: 10px; }
+            nav a { font-size: 11px; }
+            .btn-header-support { width: 80%; max-width: 250px; padding: 10px 0; margin: 0 auto; }
+            .hero, .lessons-grid, .about-section { grid-template-columns: 1fr; }
+            .hero { padding: 60px 0; gap: 40px; }
+            .hero h1 { font-size: 42px; margin-bottom: 15px; }
+            .hero-right { display: none; }
+            .hero-right-mobile { display: flex; justify-content: center; margin-top: 25px; position: relative; height: 350px; }
+            .section-title { font-size: 32px; }
+            .about-section, .lessons-section { padding: 50px 30px; gap: 30px; }
+            .lesson-card { padding: 30px; }
+            .gallery-slider, .video-slider-container { padding: 0 40px; }
+            .video-item { flex: 0 0 300px; width: 300px; height: 300px; }
+            .video-track { gap: 40px; }
+            .slider-btn { display: flex !important; }
+        }
+    </style>
+</head>
+<body>
+    <div id="meme-container"></div>
+    <div class="theme-switcher">
+        <button class="theme-btn active" onclick="setTheme('default')">⭐</button>
+        <button class="theme-btn" onclick="setTheme('dark')">⚫</button>
+        <button class="theme-btn" onclick="setTheme('red')">🔴</button>
+    </div>
+
+    <div class="floating-banner">
+        <div class="banner-content">
+            <span class="banner-text" onclick="window.open('https://t.me/temkaenglish', '_blank')">📱 t.me/temkaenglish</span>
+            <span class="banner-text" onclick="window.open('https://t.me/temkaenglish', '_blank')">📱 t.me/temkaenglish</span>
+            <span class="banner-text" onclick="window.open('https://t.me/temkaenglish', '_blank')">📱 t.me/temkaenglish</span>
+        </div>
+    </div>
+
+    <div class="side-decoration side-left"></div>
+    <div class="side-decoration side-right"></div>
+
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <a href="#" class="logo">TemkaEnglish</a>
+                <div class="header-right">
+                    <nav>
+                        <a href="#about">Обо мне</a>
+                        <a href="#gallery">Отзывы</a>
+                        <a href="#video-reviews">Видео-отзывы</a>
+                        <a href="#lessons">Формат</a>
+                        <a href="#faq">FAQ</a>
+                    </nav>
+                    <button class="btn-header-support" onclick="window.open('https://web.telegram.org/a/#8046148853', '_blank')">Записаться</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="hero-left">
+                <div class="hero-tags">
+                    <div class="hero-tag">
+                        ✨ Лучший контент на TikTok
+                        <img src="https://cdn-icons-png.flaticon.com/256/4782/4782345.png" alt="TikTok" class="tiktok-icon" onclick="window.open('https://www.tiktok.com/@temkaenglish', '_blank')">
+                    </div>
+                    <div class="hero-tag">👥 120+ довольных учеников</div>
+                    <div class="hero-tag">💰 1500₽ месячный курс</div>
+                </div>
+
+                <div class="mobile-unified-block">
+                    <h1>TemkaEnglish</h1>
+                    <div class="hero-combined">
+                        <p><span style="background: linear-gradient(120deg, #FF6B9D, #C06C84); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; font-weight: 900;">TemkaEnglish</span></p>
+                        <p><span style="background: linear-gradient(120deg, #FF6B9D, #C06C84); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; font-weight: 900;">Уроки английского, на которых реально весело</span></p>
+                        <p>Учеба, мемы, игры и куча разговорной практики. Забудь про скучные уроки и присоединяйся к 120+ довольным ученикам.</p>
+                    </div>
+
+                    <div class="hero-right-mobile">
+                        <div class="orbiting-circles">
+                            <div class="orbit-1">
+                                <div class="orbit-dot"></div>
+                            </div>
+                        </div>
+                        <div class="hero-image-container">
+                            <div class="hero-image-glow"></div>
+                            <img src="https://i.ibb.co.com/9H6tzGsk/artem.jpg" alt="Темка" class="hero-image">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="hero-right">
+                <div class="orbiting-circles">
+                    <div class="orbit-1">
+                        <div class="orbit-dot"></div>
+                    </div>
+                </div>
+                <div class="hero-image-container">
+                    <div class="hero-image-glow"></div>
+                    <img src="https://i.ibb.co.com/9H6tzGsk/artem.jpg" alt="Темка" class="hero-image">
+                </div>
+            </div>
+        </section>
+
+        <section class="text-scroll-section">
+            <div class="scroll-container">
+                <div class="scroll-wrapper">
+                    <div class="scroll-word">школа</div>
+                    <div class="scroll-word">English</div>
+                    <div class="scroll-word">meme</div>
+                    <div class="scroll-word">мемы</div>
+                    <div class="scroll-word">school</div>
+                    <div class="scroll-word">английский</div>
+                    <div class="scroll-word">обучение</div>
+                    <div class="scroll-word">образование</div>
+                    <div class="scroll-word">школа</div>
+                    <div class="scroll-word">English</div>
+                    <div class="scroll-word">meme</div>
+                    <div class="scroll-word">мемы</div>
+                    <div class="scroll-word">school</div>
+                    <div class="scroll-word">английский</div>
+                    <div class="scroll-word">обучение</div>
+                    <div class="scroll-word">образование</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="about-section" id="about">
+            <div>
+                <img src="https://i.ibb.co.com/cXQrp3PT/temka.jpg" alt="Артем" class="about-image">
+            </div>
+            <div class="about-content">
+                <h2>ОБ АРТЁМЕ</h2>
+                <p>Я Артем - опытный преподаватель английского языка. Веду успешный канал с курсами по английскому языку около года. За это время я помог сотням людей найти свой путь в английском языке.</p>
+                <p>Изучаю английский язык более 10 лет и преподаю его около 4 лет. Мой опыт позволяет мне находить индивидуальный подход к каждому ученику.</p>
+                <ul class="features">
+                    <li>Уровень носителя</li>
+                    <li>120+ довольных учеников</li>
+                    <li>Веселая атмосфера</li>
+                    <li>Объясняю до полного понимания</li>
+                </ul>
+                <button class="btn-support" onclick="window.open('https://web.telegram.org/a/#8046148853', '_blank')">ТехПоддержка</button>
+            </div>
+        </section>
+
+        <section class="lessons-section" id="lessons">
+            <h2 class="section-title">Как проходят уроки</h2>
+            <div class="lessons-grid">
+                <div class="lesson-card">
+                    <h3>Прямой эфир • 1 час</h3>
+                    <ul class="lesson-list">
+                        <li>Объясняю темы в веселой атмосфере и игровой форме</li>
+                        <li>Даже сложная грамматика запоминается легко</li>
+                        <li>Можно с нулевого уровня</li>
+                        <li>Много разговорной практики</li>
+                        <li>Домашку можно не делать — по желанию</li>
+                    </ul>
+                    <button class="btn-record" onclick="window.open('https://web.telegram.org/a/#8046148853', '_blank')">Записаться</button>
+                </div>
+                <div class="lesson-card">
+                    <h3>Инвестиция в себя</h3>
+                    <div class="price-section">
+                        <div class="price-text">1000₽ за урок</div>
+                        <p class="price-desc">Можно подключаться с телефона, планшета или компьютера. Веб-камера не нужна. Полная свобода и комфорт.</p>
+                        <div class="methods">
+                            <div class="method">📱 Телефон</div>
+                            <div class="method">💻 ПК/Планшет</div>
+                            <div class="method">💬 Чат</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="gallery">
+            <h2 class="section-title">Отзывы</h2>
+            <div class="gallery-slider">
+                <button class="slider-btn prev" onclick="slideGallery(-1)">‹</button>
+                <div class="gallery-track" id="galleryTrack">
+                    <div class="gallery-item" onclick="openModal(this.querySelector('img').src)">
+                        <img src="https://i.ibb.co.com/TqqGyGP6/6.jpg" alt="Отзыв 1">
+                    </div>
+                    <div class="gallery-item" onclick="openModal(this.querySelector('img').src)">
+                        <img src="https://i.ibb.co.com/LXGGj1ff/1.jpg" alt="Отзыв 2">
+                    </div>
+                    <div class="gallery-item" onclick="openModal(this.querySelector('img').src)">
+                        <img src="https://i.ibb.co.com/gFmXPHLy/2.jpg" alt="Отзыв 3">
+                    </div>
+                    <div class="gallery-item" onclick="openModal(this.querySelector('img').src)">
+                        <img src="https://i.ibb.co.com/Tx0Nr6pp/3.jpg" alt="Отзыв 4">
+                    </div>
+                </div>
+                <button class="slider-btn next" onclick="slideGallery(1)">›</button>
+            </div>
+        </section>
+
+        <section class="video-reviews-section" id="video-reviews">
+            <h2 class="section-title">Видео-отзывы</h2>
+            <div class="video-slider">
+                <button class="slider-btn prev" onclick="slideVideo(-1)">‹</button>
+                <div class="video-slider-container">
+                    <div class="video-track" id="videoTrack">
+                        <div class="video-item">
+                            <video controls preload="metadata">
+                                <source src="https://files.catbox.moe/t7h7b0.mp4" type="video/mp4">
+                            </video>
+                        </div>
+                        <div class="video-item">
+                            <video controls preload="metadata">
+                                <source src="https://www.youtube.com/watch?v=JXqEbiV1kQQ" type="video/mp4">
+                            </video>
+                        </div>
+                        <div class="video-item">
+                            <video controls preload="metadata">
+                                <source src="https://files.catbox.moe/ksrtkr.mp4" type="video/mp4">
+                            </video>
+                        </div>
+                    </div>
+                </div>
+                <button class="slider-btn next" onclick="slideVideo(1)">›</button>
+            </div>
+        </section>
+
+        <div class="modal" id="modal">
+            <div class="modal-content">
+                <img id="modalImg" class="modal-img" src="" alt="">
+                <button class="modal-close" onclick="closeModal()">✕</button>
+            </div>
+        </div>
+
+        <section class="faq-section" id="faq">
+            <h2 class="section-title">Часто задаваемые вопросы</h2>
+            <div class="faq-item" onclick="toggleFaq(this)">
+                <div class="faq-header">
+                    <span>Как записаться на урок?</span>
+                    <span class="faq-toggle">▼</span>
+                </div>
+                <div class="faq-answer">После оплаты ты попадаешь в закрытую группу, где начнешь обучение с помощью авторских курсов и группы для практики</div>
+            </div>
+            <div class="faq-item" onclick="toggleFaq(this)">
+                <div class="faq-header">
+                    <span>Сколько стоят уроки?</span>
+                    <span class="faq-toggle">▼</span>
+                </div>
+                <div class="faq-answer">1700₽ за индивидуальный урок, 1000₽ за групповые из двух людей и 1500₽ подписка в месяц на курсы</div>
+            </div>
+            <div class="faq-item" onclick="toggleFaq(this)">
+                <div class="faq-header">
+                    <span>С какого возраста можно заниматься?</span>
+                    <span class="faq-toggle">▼</span>
+                </div>
+                <div class="faq-answer">Нет ограничений, можно записаться с любого возраста!</div>
+            </div>
+            <div class="faq-item" onclick="toggleFaq(this)">
+                <div class="faq-header">
+                    <span>С телефона или с компьютера?</span>
+                    <span class="faq-toggle">▼</span>
+                </div>
+                <div class="faq-answer">Можно подключиться с любого устройства: с телефона, планшета или компьютера. Вебкамера не нужна.</div>
+            </div>
+            <div class="faq-item" onclick="toggleFaq(this)">
+                <div class="faq-header">
+                    <span>Матерится можно?</span>
+                    <span class="faq-toggle">▼</span>
+                </div>
+                <div class="faq-answer">Можно! Мне главное, чтобы тебе было интересно и комфортно заниматься. На уроках общаемся на ты, прикалываемся и изучаем английский в кайф.</div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 TemkaEnglish. Все права защищены. Made with ❤️</p>
+    </footer>
+
+    <script>
+        const MEME_IMAGES = [
+            "https://i.ibb.co.com/d4N6jLwY/4.png",
+            "https://i.ibb.co.com/wftTYbX/5.png",
+            "https://i.ibb.co.com/N2wgSnzv/6.png",
+            "https://i.ibb.co.com/5W7yVpc5/7.png",
+            "https://i.ibb.co.com/6Jq8Ht7p/1.png",
+            "https://i.ibb.co.com/Kxztq53Y/2.png",
+            "https://i.ibb.co.com/HTrqB0Rk/3.png",
+            "https://i.ibb.co.com/7J3sYdfb/7.png",
+            "https://i.ibb.co.com/ksYfYqj8/6.png",
+            "https://i.ibb.co.com/TDQvctWg/5.png",
+            "https://i.ibb.co.com/21hwDQ64/4.png",
+            "https://i.ibb.co.com/Xfbt4pmJ/3.png",
+            "https://i.ibb.co.com/B5sV3Xqn/2.png",
+            "https://i.ibb.co.com/cKwdJgj5/1.png",
+            "https://i.ibb.co.com/vCmmJBSQ/11.png",
+            "https://i.ibb.co.com/yFS4kgvz/10.png",
+            "https://i.ibb.co.com/LzFSXYdm/9.png",
+            "https://i.ibb.co.com/qqJpk2J/8.png"
+        ];
+
+        const container = document.getElementById('meme-container');
+        MEME_IMAGES.forEach(src => {
+            const img = document.createElement('img');
+            img.src = src;
+            img.className = 'meme-float';
+            
+            const size = 80 + Math.random() * 80;
+            img.style.width = `${size}px`;
+            
+            const randomRotation = Math.floor(Math.random() * 91) - 45;
+            img.style.setProperty('--rotation', `${randomRotation}deg`);
+
+            const randomX = 5 + Math.random() * 90;
+            const randomY = 5 + Math.random() * 90;
+            img.style.left = `${randomX}%`;
+            img.style.top = `${randomY}%`;
+            
+            img.style.animationDelay = `-${Math.random() * 8}s`;
+            container.appendChild(img);
+        });
+
+        let currentGallerySlide = 0;
+        function slideGallery(direction) {
+            const track = document.getElementById('galleryTrack');
+            const items = track.querySelectorAll('.gallery-item');
+            const visible = window.innerWidth <= 768 ? 1 : 3;
+            currentGallerySlide += direction;
+            if (currentGallerySlide < 0) currentGallerySlide = items.length - visible;
+            if (currentGallerySlide > items.length - visible) currentGallerySlide = 0;
+            const itemWidth = items[0].offsetWidth + 30;
+            track.style.transform = `translateX(-${currentGallerySlide * itemWidth}px)`;
+        }
+
+        const videoContainer = document.querySelector('.video-slider-container');
+        const videoItems = document.querySelectorAll('.video-item');
+        function slideVideo(direction) {
+            const gap = window.innerWidth <= 768 ? 40 : 60;
+            const itemWidth = videoItems[0].offsetWidth + gap;
+            videoContainer.scrollBy({
+                left: direction * itemWidth,
+                behavior: 'smooth'
+            });
+        }
+
+        function openModal(src) {
+            const modal = document.getElementById('modal');
+            document.getElementById('modalImg').src = src;
+            modal.classList.add('active');
+        }
+        function closeModal() {
+            const modal = document.getElementById('modal');
+            modal.classList.remove('active');
+        }
+        document.getElementById('modal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+
+        function setTheme(theme) {
+            document.body.classList.remove('dark-theme', 'red-theme');
+            if (theme === 'dark') document.body.classList.add('dark-theme');
+            if (theme === 'red') document.body.classList.add('red-theme');
+            updateThemeButtons(theme);
+        }
+        function updateThemeButtons(theme) {
+            document.querySelectorAll('.theme-btn').forEach(btn => btn.classList.remove('active'));
+            const buttons = document.querySelectorAll('.theme-btn');
+            if (theme === 'default') buttons[0].classList.add('active');
+            else if (theme === 'dark') buttons[1].classList.add('active');
+            else if (theme === 'red') buttons[2].classList.add('active');
+        }
+
+        function toggleFaq(element) {
+            element.classList.toggle('active');
+        }
+
+        setTheme('default');
+
+        document.querySelectorAll('a[href^="#"]').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) target.scrollIntoView({ behavior: 'smooth' });
+            });
+        });
+    </script>
+</body>
+</html>
